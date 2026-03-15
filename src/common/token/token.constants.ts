@@ -1,0 +1,1 @@
+export const TOKEN_REDIS_CLIENT = 'TOKEN_REDIS_CLIENT';
