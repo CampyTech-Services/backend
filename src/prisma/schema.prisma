@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Blog {
+  id            String  @id @default(uuid()) @db.Uuid
+  title         String
+  slug          String  @unique
+  featuredImage String
+  content       String  @db.Text
+  excerpt       String? @db.Text
+
+  status BlogStatus @default(DRAFT)
+
+  categoryId String   @db.Uuid
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  authorId String @db.Uuid
+  author   Admin  @relation(fields: [authorId], references: [id])
+
+  comments Comment[]
+  tags     Tag[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@map("blog")
+}
+
+model Admin {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String
+  displayName    String
+  email          String   @unique
+  password       String
+  shortBio       String?
+  role           String
+  profilePicture String?
+  blogs          Blog[]
+  isVerified     Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("admin")
+}
+
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  blogs     Blog[]
+
+  @@map("tag")
+}
+
+model Category {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String  @unique
+  description String?
+  blogs       Blog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("category")
+}
+
+model Comment {
+  id      String  @id @default(uuid()) @db.Uuid
+  content String
+  email   String?
+
+  name      String
+  blogId    String   @db.Uuid
+  blog      Blog     @relation(fields: [blogId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([blogId])
+  @@map("comment")
+}

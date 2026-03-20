@@ -33,12 +33,7 @@ export interface BaseEvent<T = unknown> {
 /**
  * Factory function to create base event properties
  */
-export function createBaseEvent<T>(
-  eventName: string,
-  source: string,
-  payload: T,
-  correlationId?: string,
-): BaseEvent<T> {
+export function createBaseEvent<T>(eventName: string, source: string, payload: T, correlationId?: string): BaseEvent<T> {
   return {
     eventName,
     source,

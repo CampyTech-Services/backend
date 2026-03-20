@@ -1,10 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import {
-  BaseEvent,
-  EventHandlerFn,
-  SubscriptionOptions,
-} from '@/common/events/types';
+import { BaseEvent, EventHandlerFn, SubscriptionOptions } from '@/common/events/types';
 import { COMMON_LOG_MESSAGES } from '@/common/constants';
 
 const { EVENT_BUS: EVENT_LOG } = COMMON_LOG_MESSAGES;
@@ -70,10 +66,7 @@ export class EventBusService {
       this.logger.debug(EVENT_LOG.PUBLISHED(event.eventName));
       return results;
     } catch (error) {
-      this.logger.error(
-        EVENT_LOG.PUBLISH_ERROR(event.eventName, error.message),
-        error.stack,
-      );
+      this.logger.error(EVENT_LOG.PUBLISH_ERROR(event.eventName, error.message), error.stack);
       throw error;
     }
   }
@@ -83,9 +76,7 @@ export class EventBusService {
    * @param event The event to publish
    */
   publishAsync<T extends BaseEvent>(event: T): void {
-    this.logger.debug(
-      EVENT_LOG.PUBLISHING_ASYNC(event.eventName, event.source),
-    );
+    this.logger.debug(EVENT_LOG.PUBLISHING_ASYNC(event.eventName, event.source));
 
     // Fire and forget
     // Wildcard listeners are automatically matched by EventEmitter2.
@@ -99,11 +90,7 @@ export class EventBusService {
    * @param options Subscription options
    * @returns Unsubscribe function
    */
-  subscribe<T extends BaseEvent>(
-    eventName: string,
-    handler: EventHandlerFn<T>,
-    options: SubscriptionOptions = {},
-  ): () => void {
+  subscribe<T extends BaseEvent>(eventName: string, handler: EventHandlerFn<T>, options: SubscriptionOptions = {}): () => void {
     const { async = true, suppressErrors = false } = options;
 
     const wrappedHandler = async (event: T) => {
@@ -112,10 +99,7 @@ export class EventBusService {
           // Fire and forget
           Promise.resolve(handler(event)).catch((error) => {
             if (!suppressErrors) {
-              this.logger.error(
-                EVENT_LOG.HANDLER_ERROR(eventName, error.message),
-                error.stack,
-              );
+              this.logger.error(EVENT_LOG.HANDLER_ERROR(eventName, error.message), error.stack);
             }
           });
         } else {
@@ -123,10 +107,7 @@ export class EventBusService {
         }
       } catch (error) {
         if (!suppressErrors) {
-          this.logger.error(
-            `Error in event handler for ${eventName}: ${error.message}`,
-            error.stack,
-          );
+          this.logger.error(`Error in event handler for ${eventName}: ${error.message}`, error.stack);
           throw error;
         }
       }
@@ -148,10 +129,7 @@ export class EventBusService {
    * @param eventName The event name to subscribe to
    * @param handler The handler function
    */
-  once<T extends BaseEvent>(
-    eventName: string,
-    handler: EventHandlerFn<T>,
-  ): void {
+  once<T extends BaseEvent>(eventName: string, handler: EventHandlerFn<T>): void {
     this.eventEmitter.once(eventName, handler);
     this.logger.debug(EVENT_LOG.SUBSCRIBED_ONCE(eventName));
   }

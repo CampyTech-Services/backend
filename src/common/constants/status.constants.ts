@@ -51,17 +51,12 @@ export const RESPONSE_STATUS = {
 
 // Export type definitions
 export type ChargeStatus = (typeof CHARGE_STATUS)[keyof typeof CHARGE_STATUS];
-export type PaymentRequestStatus =
-  (typeof PAYMENT_REQUEST_STATUS)[keyof typeof PAYMENT_REQUEST_STATUS];
-export type WebhookEventType =
-  (typeof WEBHOOK_EVENT_TYPES)[keyof typeof WEBHOOK_EVENT_TYPES];
-export type CircuitBreakerState =
-  (typeof CIRCUIT_BREAKER_STATES)[keyof typeof CIRCUIT_BREAKER_STATES];
-export type ServiceStatus =
-  (typeof SERVICE_STATUS)[keyof typeof SERVICE_STATUS];
+export type PaymentRequestStatus = (typeof PAYMENT_REQUEST_STATUS)[keyof typeof PAYMENT_REQUEST_STATUS];
+export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[keyof typeof WEBHOOK_EVENT_TYPES];
+export type CircuitBreakerState = (typeof CIRCUIT_BREAKER_STATES)[keyof typeof CIRCUIT_BREAKER_STATES];
+export type ServiceStatus = (typeof SERVICE_STATUS)[keyof typeof SERVICE_STATUS];
 export type OtpStatus = (typeof OTP_STATUS)[keyof typeof OTP_STATUS];
-export type ResponseStatus =
-  (typeof RESPONSE_STATUS)[keyof typeof RESPONSE_STATUS];
+export type ResponseStatus = (typeof RESPONSE_STATUS)[keyof typeof RESPONSE_STATUS];
 
 export const INTEGRATION_SECRET_KEY_HEADER = 'integration-secret-key';
 export const NUMBER_PRECISION = 15;
