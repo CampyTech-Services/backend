@@ -2,13 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { Category } from '../../domain/entities';
 import { CreateCategoryDto, UpdateCategoryDto } from '../dto';
 import { CategoryRepositoryOutputPortService } from '@mod/category/application/ports/outbound';
+import { PaginationResult } from '@/common/types';
 import { CategoryInboundPortService } from '../ports/inbound/category-inbound-port.service';
+import { LoggerService } from '@/common/logger';
 
 @Injectable()
 export class CategoryService implements CategoryInboundPortService {
-  constructor(private readonly categoryRepository: CategoryRepositoryOutputPortService) {}
+  constructor(
+    private readonly categoryRepository: CategoryRepositoryOutputPortService,
+    private readonly logger: LoggerService,
+  ) {}
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+    this.logger.log('Creating category...' + createCategoryDto.slug);
     try {
       if (await this.categoryRepository.findBySlug(createCategoryDto.slug)) {
         throw new Error('Category with this slug already exists');
@@ -20,6 +26,7 @@ export class CategoryService implements CategoryInboundPortService {
       });
       return this.categoryRepository.create(category);
     } catch (error) {
+      this.logger.error('Failed creating category ', JSON.stringify(error));
       throw new Error(`Failed to create category: ${error}`);
     }
   }
@@ -28,8 +35,8 @@ export class CategoryService implements CategoryInboundPortService {
     return this.categoryRepository.findById(id);
   }
 
-  async findAll(): Promise<Category[]> {
-    return this.categoryRepository.findAll();
+  async findAll(page = 1, limit = 10): Promise<PaginationResult<Category>> {
+    return this.categoryRepository.findAll(page, limit);
   }
 
   async findBySlug(slug: string): Promise<Category | null> {
@@ -40,7 +47,10 @@ export class CategoryService implements CategoryInboundPortService {
     return this.categoryRepository.update(id, updateCategoryDto);
   }
 
-  async delete(id: string): Promise<boolean> {
-    return this.categoryRepository.delete(id);
+  async delete(id: string, slug?: string): Promise<boolean> {
+    if (await this.categoryRepository.findBySlug(slug)) {
+      return this.categoryRepository.delete(id);
+    }
+    throw new Error('Category data not found');
   }
 }

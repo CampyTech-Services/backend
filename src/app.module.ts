@@ -10,7 +10,6 @@ import { CategoryModule } from './modules/category/category.module';
 import { SentryModule } from '@sentry/nestjs/setup';
 import { APP_FILTER } from '@nestjs/core';
 import { SentryGlobalFilter } from '@sentry/nestjs/setup';
-import { AppController } from './app.controller';
 import { LoggerModule } from './common/logger';
 
 @Module({
@@ -36,6 +35,5 @@ import { LoggerModule } from './common/logger';
       useClass: SentryGlobalFilter,
     },
   ],
-  controllers: [],
 })
 export class AppModule {}
