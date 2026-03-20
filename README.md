@@ -21,78 +21,92 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Campytech Backend (NestJS + Prisma)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This repository is a modular NestJS API backend built with Clean Architecture principles. The current feature set includes:
 
-## Project setup
+- `auth` module
+- `blog`, `tag`, `comment`, `category` modules
+- `common` utilities (logging, pipes, exception filter, token, etc.)
+- Prisma ORM persistence and repository adapters
+- Zod validation pipes and strong type-safe DTOs
+
+## Category Module (Implemented)
+
+The `category` feature is implemented with a clear domain-driven design:
+
+- `modules/category/domain`:
+  - Entities/Value Objects for `Category`
+- `modules/category/application`:
+  - `ports/inbound/CategoryInboundPortService` (use case contract)
+  - `ports/outbound/CategoryRepositoryOutputPortService` (persistence contract)
+  - `services/CategoryService` (business logic)
+- `modules/category/infrastructure`:
+  - Prisma-based repository adapter (fulfills outbound port)
+- `modules/category/presenters`:
+  - Mappers / resource transformations
+
+### Key interfaces/abstract classes
+
+- `CategoryInboundPortService`:
+  - create
+  - findById
+  - findAll
+  - findBySlug
+  - update
+  - delete
+
+- `CategoryRepositoryOutputPortService`:
+  - create
+  - findById
+  - findAll
+  - findBySlug
+  - update
+  - delete
+
+## Getting started
 
 ```bash
-$ pnpm install
+pnpm install
+pnpm run start:dev
 ```
 
-## Compile and run the project
+### Schema migration
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm run prisma:migrate
+pnpm run prisma:studio
 ```
 
-## Run tests
+### Tests
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm run test
+pnpm run test:e2e
+pnpm run test:cov
 ```
 
-## Deployment
+## Endpoints
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+(Assuming controllers are wired, adapt as needed.)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- `POST /category`
+- `GET /category`
+- `GET /category/:id`
+- `GET /category/slug/:slug`
+- `PUT /category/:id`
+- `DELETE /category/:id`
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+## Contributing
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- Follow the module-based architecture in `src/modules/*`
+- Extend inbound/outbound ports first before concrete implementations
+- Keep domain logic in `domain`, application logic in `application`, and persistence in `infrastructure`
 
-## Resources
+## Notes
 
-Check out a few resources that may come in handy when working with NestJS:
+- Interface docs have been added in `src/modules/category/application/ports/inbound/category-inbound-port.service.ts` and `src/modules/category/application/ports/outbound/category-repository-outbound-port.service.ts`.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Updated from starter Nest README to reflect Campytech backend implementation.
