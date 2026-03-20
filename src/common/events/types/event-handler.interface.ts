@@ -15,9 +15,7 @@ export interface EventHandler<T extends BaseEvent = BaseEvent> {
 /**
  * Type for event handler functions
  */
-export type EventHandlerFn<T extends BaseEvent = BaseEvent> = (
-  event: T,
-) => Promise<void> | void;
+export type EventHandlerFn<T extends BaseEvent = BaseEvent> = (event: T) => Promise<void> | void;
 
 /**
  * Options for event subscription

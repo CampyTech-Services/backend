@@ -1,15 +1,9 @@
-import {
-  Injectable,
-  Inject,
-  Optional,
-  LoggerService as NestLoggerService,
-} from '@nestjs/common';
-import {
-  LogLevel,
-  LOG_LEVEL_PRIORITY,
-  LoggerConfig,
-  LogEntry,
-} from '@/common/logger/types';
+import { Injectable, Inject, Optional, LoggerService as NestLoggerService } from '@nestjs/common';
+import { LogLevel, LOG_LEVEL_PRIORITY, LoggerConfig, LogEntry } from '@/common/logger/types';
+
+import * as Sentry from '@sentry/nestjs';
+
+// Sentry.logger.info('User triggered test log', { action: 'test_log' })
 
 /**
  * Injection token for logger configuration
@@ -94,9 +88,7 @@ export class LoggerService implements NestLoggerService {
   private readonly config: LoggerConfig;
   private context?: string;
 
-  constructor(
-    @Optional() @Inject(LOGGER_CONFIG) config?: Partial<LoggerConfig>,
-  ) {
+  constructor(@Optional() @Inject(LOGGER_CONFIG) config?: Partial<LoggerConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
@@ -125,39 +117,25 @@ export class LoggerService implements NestLoggerService {
     const error = trace instanceof Error ? trace : undefined;
     const errorStack = trace instanceof Error ? trace.stack : trace;
 
-    this.writeLog(
-      LogLevel.ERROR,
-      message,
-      context || this.context || 'Application',
-      {
-        error: error
-          ? {
-              name: error.name,
-              message: error.message,
-              stack: this.config.includeStackTrace ? errorStack : undefined,
-            }
-          : errorStack
-            ? { stack: errorStack }
-            : undefined,
-      },
-    );
+    this.writeLog(LogLevel.ERROR, message, context || this.context || 'Application', {
+      error: error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: this.config.includeStackTrace ? errorStack : undefined,
+          }
+        : errorStack
+          ? { stack: errorStack }
+          : undefined,
+    });
   }
 
   /**
    * Log a warning message
    */
-  warn(
-    message: string,
-    context?: string,
-    data?: Record<string, unknown>,
-  ): void {
+  warn(message: string, context?: string, data?: Record<string, unknown>): void {
     if (!this.shouldLog(LogLevel.WARN)) return;
-    this.writeLog(
-      LogLevel.WARN,
-      message,
-      context || this.context || 'Application',
-      { data },
-    );
+    this.writeLog(LogLevel.WARN, message, context || this.context || 'Application', { data });
   }
 
   /**
@@ -170,64 +148,31 @@ export class LoggerService implements NestLoggerService {
   /**
    * Log an info message
    */
-  info(
-    message: string,
-    context?: string,
-    data?: Record<string, unknown>,
-  ): void {
+  info(message: string, context?: string, data?: Record<string, unknown>): void {
     if (!this.shouldLog(LogLevel.INFO)) return;
-    this.writeLog(
-      LogLevel.INFO,
-      message,
-      context || this.context || 'Application',
-      { data },
-    );
+    this.writeLog(LogLevel.INFO, message, context || this.context || 'Application', { data });
   }
 
   /**
    * Log a debug message
    */
-  debug(
-    message: string,
-    context?: string,
-    data?: Record<string, unknown>,
-  ): void {
+  debug(message: string, context?: string, data?: Record<string, unknown>): void {
     if (!this.shouldLog(LogLevel.DEBUG)) return;
-    this.writeLog(
-      LogLevel.DEBUG,
-      message,
-      context || this.context || 'Application',
-      { data },
-    );
+    this.writeLog(LogLevel.DEBUG, message, context || this.context || 'Application', { data });
   }
 
   /**
    * Log a verbose message
    */
-  verbose(
-    message: string,
-    context?: string,
-    data?: Record<string, unknown>,
-  ): void {
+  verbose(message: string, context?: string, data?: Record<string, unknown>): void {
     if (!this.shouldLog(LogLevel.VERBOSE)) return;
-    this.writeLog(
-      LogLevel.VERBOSE,
-      message,
-      context || this.context || 'Application',
-      { data },
-    );
+    this.writeLog(LogLevel.VERBOSE, message, context || this.context || 'Application', { data });
   }
 
   /**
    * Log with correlation ID for request tracing
    */
-  logWithCorrelation(
-    level: LogLevel,
-    message: string,
-    correlationId: string,
-    context?: string,
-    data?: Record<string, unknown>,
-  ): void {
+  logWithCorrelation(level: LogLevel, message: string, correlationId: string, context?: string, data?: Record<string, unknown>): void {
     if (!this.shouldLog(level)) return;
     this.writeLog(level, message, context || this.context || 'Application', {
       correlationId,
@@ -282,16 +227,15 @@ export class LoggerService implements NestLoggerService {
    * Write log entry as JSON
    */
   private writeJson(entry: LogEntry): void {
-    // Remove undefined values for cleaner JSON output
     const cleanEntry = JSON.parse(JSON.stringify(entry));
     const output = JSON.stringify(cleanEntry);
 
     if (entry.level === LogLevel.ERROR) {
-      console.error(output);
+      Sentry.captureMessage(entry.message, { level: 'error' });
     } else if (entry.level === LogLevel.WARN) {
-      console.warn(output);
+      Sentry.captureMessage(entry.message, { level: 'warning' });
     } else {
-      console.log(output);
+      Sentry.captureMessage(entry.message, { level: 'info' });
     }
   }
 
@@ -324,12 +268,7 @@ export class LoggerService implements NestLoggerService {
     }
 
     // Determine output method based on level
-    const logFn =
-      entry.level === LogLevel.ERROR
-        ? console.error
-        : entry.level === LogLevel.WARN
-          ? console.warn
-          : console.log;
+    const logFn = entry.level === LogLevel.ERROR ? console.error : entry.level === LogLevel.WARN ? console.warn : console.log;
 
     logFn(output);
 
@@ -341,9 +280,7 @@ export class LoggerService implements NestLoggerService {
     // Log error details if present
     if (entry.error) {
       if (entry.error.name && entry.error.message) {
-        logFn(
-          `${levelColor}  Error: ${entry.error.name}: ${entry.error.message}${reset}`,
-        );
+        logFn(`${levelColor}  Error: ${entry.error.name}: ${entry.error.message}${reset}`);
       }
       if (entry.error.stack && this.config.includeStackTrace) {
         logFn(`${gray}${entry.error.stack}${reset}`);

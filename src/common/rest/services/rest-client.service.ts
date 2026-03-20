@@ -4,11 +4,7 @@ import { AxiosError, AxiosRequestConfig } from 'axios';
 import { LoggerService } from '@/common/logger';
 import { RestClientPortService } from '@/common/rest/ports';
 import { RestTimeoutException } from '@/common/rest/exceptions';
-import type {
-  RestClientConfig,
-  RestRequestOptions,
-  RestResponse,
-} from '@/common/rest/types';
+import type { RestClientConfig, RestRequestOptions, RestResponse } from '@/common/rest/types';
 import { COMMON_LOG_MESSAGES } from '@/common/constants';
 
 const { REST_CLIENT: REST_LOG } = COMMON_LOG_MESSAGES;
@@ -45,53 +41,30 @@ export class RestClientService implements RestClientPortService {
     this.logger = loggerService.createChildLogger('RestClientService');
   }
 
-  async get<T = unknown>(
-    url: string,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>> {
+  async get<T = unknown>(url: string, options?: RestRequestOptions): Promise<RestResponse<T>> {
     return this.request<T>('GET', url, undefined, options);
   }
 
-  async post<T = unknown>(
-    url: string,
-    body?: unknown,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>> {
+  async post<T = unknown>(url: string, body?: unknown, options?: RestRequestOptions): Promise<RestResponse<T>> {
     return this.request<T>('POST', url, body, options);
   }
 
-  async put<T = unknown>(
-    url: string,
-    body?: unknown,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>> {
+  async put<T = unknown>(url: string, body?: unknown, options?: RestRequestOptions): Promise<RestResponse<T>> {
     return this.request<T>('PUT', url, body, options);
   }
 
-  async patch<T = unknown>(
-    url: string,
-    body?: unknown,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>> {
+  async patch<T = unknown>(url: string, body?: unknown, options?: RestRequestOptions): Promise<RestResponse<T>> {
     return this.request<T>('PATCH', url, body, options);
   }
 
-  async delete<T = unknown>(
-    url: string,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>> {
+  async delete<T = unknown>(url: string, options?: RestRequestOptions): Promise<RestResponse<T>> {
     return this.request<T>('DELETE', url, undefined, options);
   }
 
   /**
    * Execute an HTTP request with logging and error handling
    */
-  private async request<T>(
-    method: string,
-    url: string,
-    body?: unknown,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>> {
+  private async request<T>(method: string, url: string, body?: unknown, options?: RestRequestOptions): Promise<RestResponse<T>> {
     const axiosConfig: AxiosRequestConfig = {
       method,
       url,
@@ -115,14 +88,10 @@ export class RestClientService implements RestClientPortService {
     try {
       const response = await this.httpService.axiosRef.request<T>(axiosConfig);
       const duration = Date.now() - start;
-      this.logger.debug(
-        REST_LOG.RESPONSE_SUCCESS(method, url, response.status, duration),
-        undefined,
-        {
-          statusCode: response.status,
-          duration,
-        },
-      );
+      this.logger.debug(REST_LOG.RESPONSE_SUCCESS(method, url, response.status, duration), undefined, {
+        statusCode: response.status,
+        duration,
+      });
 
       return {
         statusCode: response.status,
@@ -134,27 +103,10 @@ export class RestClientService implements RestClientPortService {
 
       if (error instanceof AxiosError) {
         const status = error.response?.status;
-        this.logger.error(
-          REST_LOG.RESPONSE_ERROR(
-            method,
-            url,
-            status ?? 'NETWORK_ERROR',
-            duration,
-            error.message,
-          ),
-          error,
-        );
+        this.logger.error(REST_LOG.RESPONSE_ERROR(method, url, status ?? 'NETWORK_ERROR', duration, error.message), error);
 
-        if (
-          error.code === 'ECONNABORTED' ||
-          error.code === 'ETIMEDOUT' ||
-          error.code === 'ERR_CANCELED'
-        ) {
-          throw new RestTimeoutException(
-            method,
-            url,
-            axiosConfig.timeout ?? this.config.timeout ?? 0,
-          );
+        if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.code === 'ERR_CANCELED') {
+          throw new RestTimeoutException(method, url, axiosConfig.timeout ?? this.config.timeout ?? 0);
         }
 
         if (error.response) {
@@ -165,10 +117,7 @@ export class RestClientService implements RestClientPortService {
           };
         }
       } else {
-        this.logger.error(
-          REST_LOG.RESPONSE_UNKNOWN_ERROR(method, url, duration),
-          error as Error,
-        );
+        this.logger.error(REST_LOG.RESPONSE_UNKNOWN_ERROR(method, url, duration), error as Error);
       }
       throw error;
     }

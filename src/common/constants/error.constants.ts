@@ -74,8 +74,7 @@ export const ERROR_CODES = {
   // Provider specific
   KONGAPAY_OTP_RETRIES_LEFT: 'KONGAPAY_OTP_RETRIES_LEFT',
   CARD_SERVICE_RETRIES_LEFT_ERROR_CODE: 'CARD_SERVICE_RETRIES_LEFT_ERROR_CODE',
-  CARD_SERVICE_INSUFFICENT_BALANCE_CODE:
-    'CARD_SERVICE_INSUFFICENT_BALANCE_CODE',
+  CARD_SERVICE_INSUFFICENT_BALANCE_CODE: 'CARD_SERVICE_INSUFFICENT_BALANCE_CODE',
   MANDATE_OTP_RETRIES_LEFT: 'MANDATE_OTP_RETRIES_LEFT',
 
   // Customer & Data
@@ -135,15 +134,13 @@ export const ERROR_MESSAGES = {
   [ERROR_CODES.TOO_MANY_REQUESTS]: 'Too many requests, please try again later',
 
   // Refunds
-  [ERROR_CODES.REFUND_AMOUNT_EXCEEDED]:
-    'Refund amount exceeds original transaction amount',
+  [ERROR_CODES.REFUND_AMOUNT_EXCEEDED]: 'Refund amount exceeds original transaction amount',
   [ERROR_CODES.REFUND_NOT_ALLOWED]: 'Refund not allowed for this transaction',
   [ERROR_CODES.REFUND_FAILED]: 'Refund processing failed',
 
   // Settlement
   [ERROR_CODES.SETTLEMENT_FAILED]: 'Settlement processing failed',
-  [ERROR_CODES.SETTLEMENT_NOT_ALLOWED]:
-    'Settlement not allowed for this transaction',
+  [ERROR_CODES.SETTLEMENT_NOT_ALLOWED]: 'Settlement not allowed for this transaction',
 
   // OTP & Verification
   [ERROR_CODES.INVALID_OTP]: 'Invalid OTP provided',
@@ -161,8 +158,7 @@ export const ERROR_MESSAGES = {
 
   // Provider specific
   [ERROR_CODES.KONGAPAY_OTP_RETRIES_LEFT]: 'OTP retries remaining',
-  [ERROR_CODES.CARD_SERVICE_RETRIES_LEFT_ERROR_CODE]:
-    'Card service retries remaining',
+  [ERROR_CODES.CARD_SERVICE_RETRIES_LEFT_ERROR_CODE]: 'Card service retries remaining',
   [ERROR_CODES.CARD_SERVICE_INSUFFICENT_BALANCE_CODE]: 'Insufficient balance',
   [ERROR_CODES.MANDATE_OTP_RETRIES_LEFT]: 'Mandate OTP retries remaining',
 

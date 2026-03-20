@@ -1,23 +1,41 @@
 import { Module } from '@nestjs/common';
-
 import { ConfigModule } from '@nestjs/config';
-import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './modules/user/user.module';
-import { BlogModule } from './modules/blog/blog.module';
-import { AdminModule } from './modules/admin/admin.module';
 import { EventsModule } from './common/events';
+import { PERSISTENCE_DRIVERS } from './common/constants';
+import { BlogModule } from './modules/blog/blog.module';
+import { CommentModule } from './modules/comment/comment.module';
+import { TagModule } from './modules/tag/tag.module';
+import { CategoryModule } from './modules/category/category.module';
+import { SentryModule } from '@sentry/nestjs/setup';
+import { APP_FILTER } from '@nestjs/core';
+import { SentryGlobalFilter } from '@sentry/nestjs/setup';
+import { AppController } from './app.controller';
+import { LoggerModule } from './common/logger';
 
 @Module({
   imports: [
     AuthModule,
-    UserModule,
     ConfigModule.forRoot({}),
-    BlogModule,
-    AdminModule,
+    SentryModule.forRoot(),
     EventsModule,
+    BlogModule,
+    CommentModule,
+    TagModule,
+    CategoryModule,
+    LoggerModule.registerAsync({
+      useFactory: () => ({
+        json: false,
+        appName: 'campytech-backend',
+      }),
+    }),
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: SentryGlobalFilter,
+    },
   ],
   controllers: [],
-  providers: [AppService],
 })
 export class AppModule {}

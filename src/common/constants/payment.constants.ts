@@ -102,17 +102,12 @@ export const PAGE_GENERATION_MODE = {
 } as const;
 
 // Export type definitions
-export type PaymentProvider =
-  (typeof PAYMENT_PROVIDERS)[keyof typeof PAYMENT_PROVIDERS];
-export type PaymentMethod =
-  (typeof PAYMENT_METHODS)[keyof typeof PAYMENT_METHODS];
-export type PaymentAction =
-  (typeof PAYMENT_ACTIONS)[keyof typeof PAYMENT_ACTIONS];
+export type PaymentProvider = (typeof PAYMENT_PROVIDERS)[keyof typeof PAYMENT_PROVIDERS];
+export type PaymentMethod = (typeof PAYMENT_METHODS)[keyof typeof PAYMENT_METHODS];
+export type PaymentAction = (typeof PAYMENT_ACTIONS)[keyof typeof PAYMENT_ACTIONS];
 export type CurrencyCode = (typeof CURRENCY_CODES)[keyof typeof CURRENCY_CODES];
 export type ChannelType = (typeof CHANNEL_TYPES)[keyof typeof CHANNEL_TYPES];
-export type ChannelIdentifier =
-  (typeof CHANNEL_IDENTIFIERS)[keyof typeof CHANNEL_IDENTIFIERS];
-export type TransactionActivity =
-  (typeof TRANSACTION_ACTIVITIES)[keyof typeof TRANSACTION_ACTIVITIES];
+export type ChannelIdentifier = (typeof CHANNEL_IDENTIFIERS)[keyof typeof CHANNEL_IDENTIFIERS];
+export type TransactionActivity = (typeof TRANSACTION_ACTIVITIES)[keyof typeof TRANSACTION_ACTIVITIES];
 
 export const REFERENCE_IDENTIFIER_LENGTH = 5;

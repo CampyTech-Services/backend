@@ -29,43 +29,25 @@ export abstract class RestClientPortService {
   /**
    * Send an HTTP GET request
    */
-  abstract get<T = unknown>(
-    url: string,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>>;
+  abstract get<T = unknown>(url: string, options?: RestRequestOptions): Promise<RestResponse<T>>;
 
   /**
    * Send an HTTP POST request
    */
-  abstract post<T = unknown>(
-    url: string,
-    body?: unknown,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>>;
+  abstract post<T = unknown>(url: string, body?: unknown, options?: RestRequestOptions): Promise<RestResponse<T>>;
 
   /**
    * Send an HTTP PUT request
    */
-  abstract put<T = unknown>(
-    url: string,
-    body?: unknown,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>>;
+  abstract put<T = unknown>(url: string, body?: unknown, options?: RestRequestOptions): Promise<RestResponse<T>>;
 
   /**
    * Send an HTTP PATCH request
    */
-  abstract patch<T = unknown>(
-    url: string,
-    body?: unknown,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>>;
+  abstract patch<T = unknown>(url: string, body?: unknown, options?: RestRequestOptions): Promise<RestResponse<T>>;
 
   /**
    * Send an HTTP DELETE request
    */
-  abstract delete<T = unknown>(
-    url: string,
-    options?: RestRequestOptions,
-  ): Promise<RestResponse<T>>;
+  abstract delete<T = unknown>(url: string, options?: RestRequestOptions): Promise<RestResponse<T>>;
 }

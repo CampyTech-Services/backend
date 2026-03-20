@@ -111,7 +111,5 @@ export interface LoggerModuleAsyncOptions {
   /**
    * Factory function to create config
    */
-  useFactory: (
-    ...args: any[]
-  ) => Promise<Partial<LoggerConfig>> | Partial<LoggerConfig>;
+  useFactory: (...args: any[]) => Promise<Partial<LoggerConfig>> | Partial<LoggerConfig>;
 }
