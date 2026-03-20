@@ -1,5 +1,6 @@
 import { Category } from '@mod/category/domain/entities';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../dto';
+import { PaginationResult } from '@/common/types';
 
 /**
  * Inbound port (application-level use case interface) for category operations.
@@ -26,7 +27,7 @@ export abstract class CategoryInboundPortService {
    * Get all categories.
    * @returns Promise resolving to array of categories
    */
-  abstract findAll(): Promise<Category[]>;
+  abstract findAll(page?: number, limit?: number): Promise<PaginationResult<Category>>;
 
   /**
    * Get a category by its slug.

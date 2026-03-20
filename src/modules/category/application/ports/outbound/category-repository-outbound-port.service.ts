@@ -1,4 +1,5 @@
 import { Category } from '../../../domain/entities';
+import { PaginationResult } from '@/common/types';
 
 /**
  * Outbound port for category persistence operations.
@@ -22,10 +23,12 @@ export abstract class CategoryRepositoryOutputPortService {
   abstract findById(id: string): Promise<Category | null>;
 
   /**
-   * List all categories.
-   * @returns Promise resolving with an array of categories
+   * List categories with optional pagination.
+   * @param page - Page number starting from 1
+   * @param limit - Items per page
+   * @returns Promise resolving with pagination result
    */
-  abstract findAll(): Promise<Category[]>;
+  abstract findAll(page?: number, limit?: number): Promise<PaginationResult<Category>>;
 
   /**
    * Find a category by slug.

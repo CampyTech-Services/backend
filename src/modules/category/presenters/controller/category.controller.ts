@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../application/dto';
 import { Category } from '../../domain/entities';
+import { PaginationResult } from '@/common/types';
 import { CategoryInboundPortService } from '@mod/category/application/ports/inbound/category-inbound-port.service';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import { createCategorySchema } from '../http/zod-schema/request';
@@ -19,8 +20,8 @@ export class CategoryController {
   }
 
   @Get()
-  findAll(): Promise<Category[]> {
-    return this.categoryService.findAll();
+  findAll(@Query('page') page = '1', @Query('limit') limit = '10'): Promise<PaginationResult<Category>> {
+    return this.categoryService.findAll(Number(page), Number(limit));
   }
 
   @Get(':id')

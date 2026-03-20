@@ -2,6 +2,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Category } from '@mod/category/domain/entities';
 import { CategoryRepositoryOutputPortService } from '@mod/category/application/ports/outbound/category-repository-outbound-port.service';
+import { PaginationResult } from '@/common/types';
 
 @Injectable()
 export class CategoryOutboundAdapterRepository implements CategoryRepositoryOutputPortService {
@@ -24,8 +25,15 @@ export class CategoryOutboundAdapterRepository implements CategoryRepositoryOutp
     })) as Category | null;
   }
 
-  async findAll(): Promise<Category[]> {
-    return (await this.categoryRepository.category.findMany()) as Category[];
+  async findAll(page = 1, limit = 10): Promise<PaginationResult<Category>> {
+    const skip = (page - 1) * limit;
+    const [items, total] = await Promise.all([this.categoryRepository.category.findMany({ skip, take: limit }), this.categoryRepository.category.count()]);
+    return {
+      items: items as Category[],
+      total,
+      page,
+      limit,
+    };
   }
 
   async findBySlug(slug: string): Promise<Category | null> {
