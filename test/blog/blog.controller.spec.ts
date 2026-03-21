@@ -43,8 +43,8 @@ describe('BlogController', () => {
         slug: 'test',
         featuredImage: 'img',
         content: 'cont',
-        categoryId: 'cat',
-        authorId: 'auth',
+        categoryId: '550e8400-e29b-41d4-a716-446655440000',
+        authorId: '550e8400-e29b-41d4-a716-446655440001',
       };
       const blog = new Blog(createBlogDto);
       mockService.create.mockResolvedValue(blog);
@@ -62,7 +62,7 @@ describe('BlogController', () => {
       const paginationResult: PaginationResult<Blog> = { items: blogs, total: 1, page: 1, limit: 10 };
       mockService.findAll.mockResolvedValue(paginationResult);
 
-      const result = await controller.findAll('1', '10');
+      const result = await controller.findAll(1, 10);
 
       expect(mockService.findAll).toHaveBeenCalledWith(1, 10);
       expect(result).toEqual(paginationResult);

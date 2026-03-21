@@ -7,4 +7,5 @@ export class UpdateBlogDto {
   status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   categoryId?: string;
   authorId?: string;
+  tagIds?: string[];
 }

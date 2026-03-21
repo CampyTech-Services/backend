@@ -1,27 +1,28 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../application/dto';
 import { Category } from '../../domain/entities';
 import { PaginationResult } from '@/common/types';
 import { CategoryInboundPortService } from '@mod/category/application/ports/inbound/category-inbound-port.service';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
-import { createCategorySchema } from '../http/zod-schema/request';
+import { createCategorySchema, updateCategorySchema } from '../http/zod-schema/request';
+import { AdminAuthGuard } from '@/modules/auth/guards';
 
-@Controller('category')
-export class CategoryController {
+@UseGuards(AdminAuthGuard)
+@Controller('admin/category')
+export class AdminCategoryController {
   constructor(private readonly categoryService: CategoryInboundPortService) {}
 
   @Post()
-  create(
-    @Body(new ZodValidationPipe(createCategorySchema))
-    createCategoryDto: CreateCategoryDto,
-  ): Promise<Category> {
-    console.log(createCategoryDto);
+  create(@Body(new ZodValidationPipe(createCategorySchema)) createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoryService.create(createCategoryDto);
   }
 
   @Get()
-  findAll(@Query('page') page = '1', @Query('limit') limit = '10'): Promise<PaginationResult<Category>> {
-    return this.categoryService.findAll(Number(page), Number(limit));
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ): Promise<PaginationResult<Category>> {
+    return this.categoryService.findAll(page, limit);
   }
 
   @Get(':id')
@@ -35,7 +36,7 @@ export class CategoryController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+  update(@Param('id') id: string, @Body(new ZodValidationPipe(updateCategorySchema)) updateCategoryDto: UpdateCategoryDto): Promise<Category> {
     return this.categoryService.update(id, updateCategoryDto);
   }
 

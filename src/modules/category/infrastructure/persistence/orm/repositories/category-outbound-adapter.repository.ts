@@ -9,27 +9,31 @@ export class CategoryOutboundAdapterRepository implements CategoryRepositoryOutp
   constructor(private readonly categoryRepository: PrismaService) {}
 
   async create(category: Category): Promise<Category> {
-    return this.categoryRepository.category.create({
+    const createdCategory = await this.categoryRepository.category.create({
       data: {
         id: category.id,
         name: category.name,
         slug: category.slug,
-        // description: category.description,
+        description: category.description,
       },
-    }) as unknown as Promise<Category>;
+    });
+
+    return this.toDomain(createdCategory);
   }
 
   async findById(id: string): Promise<Category | null> {
-    return (await this.categoryRepository.category.findUnique({
+    const category = await this.categoryRepository.category.findUnique({
       where: { id },
-    })) as Category | null;
+    });
+
+    return category ? this.toDomain(category) : null;
   }
 
   async findAll(page = 1, limit = 10): Promise<PaginationResult<Category>> {
     const skip = (page - 1) * limit;
     const [items, total] = await Promise.all([this.categoryRepository.category.findMany({ skip, take: limit }), this.categoryRepository.category.count()]);
     return {
-      items: items as Category[],
+      items: items.map((item) => this.toDomain(item)),
       total,
       page,
       limit,
@@ -37,16 +41,24 @@ export class CategoryOutboundAdapterRepository implements CategoryRepositoryOutp
   }
 
   async findBySlug(slug: string): Promise<Category | null> {
-    return (await this.categoryRepository.category.findFirst({
+    const category = await this.categoryRepository.category.findFirst({
       where: { slug },
-    })) as Category | null;
+    });
+
+    return category ? this.toDomain(category) : null;
   }
 
   async update(id: string, category: Partial<Category>): Promise<Category> {
-    return (await this.categoryRepository.category.update({
+    const updatedCategory = await this.categoryRepository.category.update({
       where: { id },
-      data: category,
-    })) as Category;
+      data: {
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+      },
+    });
+
+    return this.toDomain(updatedCategory);
   }
 
   async delete(id: string): Promise<boolean> {
@@ -54,5 +66,16 @@ export class CategoryOutboundAdapterRepository implements CategoryRepositoryOutp
       where: { id },
     });
     return true;
+  }
+
+  private toDomain(category: { id: string; name: string; slug: string; description: string | null; createdAt: Date; updatedAt: Date }): Category {
+    return new Category({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      description: category.description ?? undefined,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+    });
   }
 }

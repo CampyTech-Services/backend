@@ -1,1 +1,1 @@
-export * from '../../../presenters/controller/category.controller';
+export * from './category-inbound-port.service';

@@ -1,1 +1,1 @@
-export * from './category.presenter';
+export * from './controller';

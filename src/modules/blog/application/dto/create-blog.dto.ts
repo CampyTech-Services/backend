@@ -7,4 +7,5 @@ export class CreateBlogDto {
   status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   categoryId!: string;
   authorId!: string;
+  tagIds?: string[];
 }
