@@ -1,6 +1,3 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
-
 import { NestApplication, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import './instrument';
@@ -8,6 +5,8 @@ import { CatchAllExceptionFilter } from './common/utils/global.filter';
 import { LoggerService } from './common/logger';
 import * as Sentry from '@sentry/nestjs';
 import { ValidationPipe } from '@nestjs/common';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create<NestApplication>(AppModule);
