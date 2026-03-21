@@ -23,7 +23,7 @@ model Blog {
   title         String
   slug          String  @unique
   featuredImage String
-  content       String  @db.Text
+  content       Json    @db.Json
   excerpt       String? @db.Text
 
   status BlogStatus @default(DRAFT)

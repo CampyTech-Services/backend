@@ -19,7 +19,7 @@ export class CatchAllExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       message: this.getErrorMessage(exception),
-      ...(process.env.NODE_ENV !== 'production' && { error: exception }),
+      ...(process.env.NODE_ENV !== 'production' && { error: this.getErrorDetails(exception) }),
     };
 
     this.logger.error(`Exception caught: ${errorResponse.message}`, exception instanceof Error ? exception.stack : '');
@@ -81,5 +81,37 @@ export class CatchAllExceptionFilter implements ExceptionFilter {
       return exception.message;
     }
     return exception instanceof Error ? exception.message : 'Internal Server Error';
+  }
+
+  private getErrorDetails(exception: unknown): Record<string, unknown> | undefined {
+    if (exception instanceof HttpException) {
+      const exceptionResponse = exception.getResponse();
+
+      if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+        const { message, error, statusCode, ...rest } = exceptionResponse as Record<string, unknown>;
+        return {
+          name: exception.name,
+          error,
+          statusCode,
+          ...(Array.isArray(message) ? { details: message } : {}),
+          ...rest,
+        };
+      }
+
+      return {
+        name: exception.name,
+        error: exception.message,
+        statusCode: exception.getStatus(),
+      };
+    }
+
+    if (exception instanceof Error) {
+      return {
+        name: exception.name,
+        error: exception.message,
+      };
+    }
+
+    return undefined;
   }
 }

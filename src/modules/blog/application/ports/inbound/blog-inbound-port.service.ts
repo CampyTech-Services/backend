@@ -30,6 +30,14 @@ export abstract class BlogInboundPortService {
   abstract findAll(page?: number, limit?: number): Promise<PaginationResult<Blog>>;
 
   /**
+   * List published blogs for public consumption.
+   * @param page Page number starting from 1
+   * @param limit Items per page
+   * @returns Pagination result containing only published blogs
+   */
+  abstract findPublished(page?: number, limit?: number): Promise<PaginationResult<Blog>>;
+
+  /**
    * Fetch blog by slug.
    * @param slug Blog slug
    * @returns Blog or null when not found
@@ -37,11 +45,25 @@ export abstract class BlogInboundPortService {
   abstract findBySlug(slug: string): Promise<Blog | null>;
 
   /**
+   * Fetch a published blog by slug for public consumption.
+   * @param slug Blog slug
+   * @returns published Blog or null when not found
+   */
+  abstract findPublishedBySlug(slug: string): Promise<Blog | null>;
+
+  /**
    * List blogs in a category.
    * @param categoryId Category identifier
    * @returns Array of Blog entities
    */
   abstract findByCategoryId(categoryId: string): Promise<Blog[]>;
+
+  /**
+   * List published blogs in a category for public consumption.
+   * @param categoryId Category identifier
+   * @returns Array of published Blog entities
+   */
+  abstract findPublishedByCategoryId(categoryId: string): Promise<Blog[]>;
 
   /**
    * Update a blog record.

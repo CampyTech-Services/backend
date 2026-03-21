@@ -1,21 +1,28 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { Blog } from '@mod/blog/domain';
 import { CreateBlogDto, UpdateBlogDto } from '../../application/dto';
 import { BlogInboundPortService } from '@mod/blog/application/ports/inbound/blog-inbound-port.service';
 import { PaginationResult } from '@/common/types';
+import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
+import { createBlogSchema, updateBlogSchema } from '../http/zod-schema/request';
+import { AdminAuthGuard } from '@/modules/auth/guards';
 
-@Controller('blog')
-export class BlogController {
+@UseGuards(AdminAuthGuard)
+@Controller('admin/blog')
+export class AdminBlogController {
   constructor(private readonly blogService: BlogInboundPortService) {}
 
   @Post()
-  create(@Body() createBlogDto: CreateBlogDto): Promise<Blog> {
+  create(@Body(new ZodValidationPipe(createBlogSchema)) createBlogDto: CreateBlogDto): Promise<Blog> {
     return this.blogService.create(createBlogDto);
   }
 
   @Get()
-  findAll(@Query('page') page = '1', @Query('limit') limit = '10'): Promise<PaginationResult<Blog>> {
-    return this.blogService.findAll(Number(page), Number(limit));
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ): Promise<PaginationResult<Blog>> {
+    return this.blogService.findAll(page, limit);
   }
 
   @Get(':id')
@@ -34,7 +41,7 @@ export class BlogController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto): Promise<Blog> {
+  update(@Param('id') id: string, @Body(new ZodValidationPipe(updateBlogSchema)) updateBlogDto: UpdateBlogDto): Promise<Blog> {
     return this.blogService.update(id, updateBlogDto);
   }
 

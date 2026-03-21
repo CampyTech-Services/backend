@@ -11,6 +11,7 @@ import { SentryModule } from '@sentry/nestjs/setup';
 import { APP_FILTER } from '@nestjs/core';
 import { SentryGlobalFilter } from '@sentry/nestjs/setup';
 import { LoggerModule } from './common/logger';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { LoggerModule } from './common/logger';
         appName: 'campytech-backend',
       }),
     }),
+    AdminModule,
   ],
   providers: [
     {
