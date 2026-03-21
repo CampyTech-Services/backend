@@ -11,7 +11,7 @@ import { CommentInboundPortService } from './application/ports/inbound/comment-i
   exports: [{ provide: CommentInboundPortService, useClass: CommentService }],
 })
 export class CommentModule {
-  register() {
+  static register() {
     return {
       module: CommentModule,
       imports: [CommentInfrastructureModule],

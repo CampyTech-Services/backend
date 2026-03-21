@@ -1,6 +1,7 @@
+import { Prisma } from '@/prisma/generated/prisma/client.js';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { Blog } from '@mod/blog/domain';
+import { Blog, BlogContent } from '@mod/blog/domain';
 import { BlogRepositoryOutputPortService } from '@mod/blog/application/ports/outbound/blog-repository-outbound-port.service';
 import { PaginationResult } from '@/common/types';
 
@@ -18,7 +19,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
         title: blog.title,
         slug: blog.slug,
         featuredImage: blog.featuredImage,
-        content: blog.content,
+        content: blog.content as Prisma.InputJsonValue,
         excerpt: blog.excerpt,
         status: blog.status,
         categoryId: blog.categoryId,
@@ -93,7 +94,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
         title: blog.title,
         slug: blog.slug,
         featuredImage: blog.featuredImage,
-        content: blog.content,
+        content: blog.content as Prisma.InputJsonValue,
         excerpt: blog.excerpt,
         status: blog.status,
         categoryId: blog.categoryId,
@@ -116,12 +117,12 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
     title: string;
     slug: string;
     featuredImage: string;
-    content: string;
+    content: BlogContent;
     excerpt: string | null;
     status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
     categoryId: string;
     authorId: string;
-    tags: Array<{ id: string }>;
+    tags?: Array<{ id: string }>;
     createdAt: Date;
     updatedAt: Date;
   }): Blog {
@@ -135,7 +136,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
       status: blog.status,
       categoryId: blog.categoryId,
       authorId: blog.authorId,
-      tagIds: blog.tags.map((tag) => tag.id),
+      tagIds: blog.tags?.map((tag) => tag.id) ?? [],
       createdAt: blog.createdAt,
       updatedAt: blog.updatedAt,
     });

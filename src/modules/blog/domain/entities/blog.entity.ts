@@ -1,11 +1,14 @@
+import { Prisma } from '@/prisma/generated/prisma/client.js';
+
 export type BlogStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type BlogContent = Prisma.JsonValue;
 
 export class Blog {
   id!: string;
   title!: string;
   slug!: string;
   featuredImage!: string;
-  content!: string;
+  content!: BlogContent;
   excerpt?: string;
   status!: BlogStatus;
   categoryId!: string;
@@ -14,12 +17,12 @@ export class Blog {
   createdAt!: Date;
   updatedAt!: Date;
 
-  constructor(data: { id?: string; title: string; slug: string; featuredImage: string; content: string; excerpt?: string; status?: BlogStatus; categoryId: string; authorId: string; tagIds?: string[]; createdAt?: Date; updatedAt?: Date }) {
+  constructor(data: { id?: string; title: string; slug: string; featuredImage: string; content: BlogContent; excerpt?: string; status?: BlogStatus; categoryId: string; authorId: string; tagIds?: string[]; createdAt?: Date; updatedAt?: Date }) {
     Object.assign(this, data);
     this.title = Blog.requireText(data.title, 'title');
     this.slug = Blog.normalizeSlug(data.slug);
     this.featuredImage = Blog.requireText(data.featuredImage, 'featuredImage');
-    this.content = Blog.requireText(data.content, 'content');
+    this.content = Blog.requireContent(data.content);
     this.categoryId = Blog.requireText(data.categoryId, 'categoryId');
     this.authorId = Blog.requireText(data.authorId, 'authorId');
     this.tagIds = Blog.normalizeTagIds(data.tagIds);
@@ -35,7 +38,7 @@ export class Blog {
     if (data.title !== undefined) this.title = Blog.requireText(data.title, 'title');
     if (data.slug !== undefined) this.slug = Blog.normalizeSlug(data.slug);
     if (data.featuredImage !== undefined) this.featuredImage = Blog.requireText(data.featuredImage, 'featuredImage');
-    if (data.content !== undefined) this.content = Blog.requireText(data.content, 'content');
+    if (data.content !== undefined) this.content = Blog.requireContent(data.content);
     if (data.excerpt !== undefined) this.excerpt = data.excerpt?.trim() || undefined;
     if (data.status !== undefined) this.status = data.status;
     if (data.categoryId !== undefined) this.categoryId = Blog.requireText(data.categoryId, 'categoryId');
@@ -54,5 +57,13 @@ export class Blog {
       throw new Error(`Blog ${field} cannot be empty`);
     }
     return normalized;
+  }
+
+  private static requireContent(content: BlogContent): BlogContent {
+    if (content === null || content === undefined) {
+      throw new Error('Blog content cannot be empty');
+    }
+
+    return content;
   }
 }

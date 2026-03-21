@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BlogService } from '@mod/blog/application/services/blog.service';
+import { BlogRelationsOutboundPortService } from '@mod/blog/application/ports/outbound';
 import { BlogRepositoryOutputPortService } from '@mod/blog/application/ports/outbound/blog-repository-outbound-port.service';
 import { LoggerService } from '@/common/logger';
 import { Blog } from '@mod/blog/domain/entities';
@@ -9,8 +10,10 @@ import { PaginationResult } from '@/common/types';
 
 describe('BlogService', () => {
   let service: BlogService;
+  const sampleContent = { type: 'doc', content: [{ type: 'paragraph', text: 'Hello world' }] };
 
   let mockRepository: jest.Mocked<BlogRepositoryOutputPortService>;
+  let mockRelations: jest.Mocked<BlogRelationsOutboundPortService>;
   let mockLogger: jest.Mocked<LoggerService>;
 
   beforeEach(async () => {
@@ -30,6 +33,14 @@ describe('BlogService', () => {
           },
         },
         {
+          provide: BlogRelationsOutboundPortService,
+          useValue: {
+            categoryExists: jest.fn(),
+            authorExists: jest.fn(),
+            countExistingTags: jest.fn(),
+          },
+        },
+        {
           provide: LoggerService,
           useValue: {
             log: jest.fn(),
@@ -41,6 +52,7 @@ describe('BlogService', () => {
 
     service = module.get<BlogService>(BlogService);
     mockRepository = module.get(BlogRepositoryOutputPortService);
+    mockRelations = module.get(BlogRelationsOutboundPortService);
     mockLogger = module.get(LoggerService);
   });
 
@@ -54,7 +66,7 @@ describe('BlogService', () => {
         title: 'Test Blog',
         slug: 'Test Blog',
         featuredImage: 'image.jpg',
-        content: 'Content',
+        content: sampleContent,
         excerpt: 'Excerpt',
         status: 'DRAFT',
         categoryId: '550e8400-e29b-41d4-a716-446655440000',
@@ -62,6 +74,8 @@ describe('BlogService', () => {
       };
       const blog = new Blog({ ...createBlogDto, slug: 'test-blog' });
       mockRepository.findBySlug.mockResolvedValue(null);
+      mockRelations.categoryExists.mockResolvedValue(true);
+      mockRelations.authorExists.mockResolvedValue(true);
       mockRepository.create.mockResolvedValue(blog);
 
       const result = await service.create(createBlogDto);
@@ -77,7 +91,7 @@ describe('BlogService', () => {
         title: 'Test Blog',
         slug: 'test-blog',
         featuredImage: 'image.jpg',
-        content: 'Content',
+        content: sampleContent,
         categoryId: '550e8400-e29b-41d4-a716-446655440000',
         authorId: '550e8400-e29b-41d4-a716-446655440001',
       };
@@ -91,7 +105,7 @@ describe('BlogService', () => {
 
   describe('findById', () => {
     it('should return a blog by id', async () => {
-      const blog = new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' });
+      const blog = new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' });
       mockRepository.findById.mockResolvedValue(blog);
 
       const result = await service.findById('id');
@@ -111,7 +125,7 @@ describe('BlogService', () => {
 
   describe('findAll', () => {
     it('should return paginated blogs', async () => {
-      const blogs = [new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' })];
+      const blogs = [new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' })];
       const paginationResult: PaginationResult<Blog> = { items: blogs, total: 1, page: 1, limit: 10 };
       mockRepository.findAll.mockResolvedValue(paginationResult);
 
@@ -129,7 +143,7 @@ describe('BlogService', () => {
 
   describe('findBySlug', () => {
     it('should return a blog by slug', async () => {
-      const blog = new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' });
+      const blog = new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' });
       mockRepository.findBySlug.mockResolvedValue(blog);
 
       const result = await service.findBySlug('test');
@@ -141,7 +155,7 @@ describe('BlogService', () => {
 
   describe('findByCategoryId', () => {
     it('should return blogs by category id', async () => {
-      const blogs = [new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' })];
+      const blogs = [new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' })];
       mockRepository.findByCategoryId.mockResolvedValue(blogs);
 
       const result = await service.findByCategoryId('cat');
@@ -154,9 +168,11 @@ describe('BlogService', () => {
   describe('update', () => {
     it('should update a blog', async () => {
       const updateBlogDto: UpdateBlogDto = { title: 'Updated' };
-      const existingBlog = new Blog({ title: 'Old', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' });
-      const blog = new Blog({ title: 'Updated', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' });
+      const existingBlog = new Blog({ title: 'Old', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' });
+      const blog = new Blog({ title: 'Updated', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' });
       mockRepository.findById.mockResolvedValue(existingBlog);
+      mockRelations.categoryExists.mockResolvedValue(true);
+      mockRelations.authorExists.mockResolvedValue(true);
       mockRepository.update.mockResolvedValue(blog);
 
       const result = await service.update('id', updateBlogDto);
@@ -175,7 +191,7 @@ describe('BlogService', () => {
 
   describe('delete', () => {
     it('should delete a blog', async () => {
-      mockRepository.findById.mockResolvedValue(new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' }));
+      mockRepository.findById.mockResolvedValue(new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' }));
       mockRepository.delete.mockResolvedValue(true);
 
       const result = await service.delete('id');
