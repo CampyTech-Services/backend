@@ -7,13 +7,15 @@ import * as Sentry from '@sentry/nestjs';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
+  console.log(process.env.PORT);
   const app = await NestFactory.create<NestApplication>(AppModule);
   const logger = app.get(LoggerService);
   logger.setContext('Bootstrap');
   app.useGlobalFilters(new CatchAllExceptionFilter(logger));
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ whitelist: false, transform: true }));
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap().catch((error) => {
   Sentry.captureException(error);
