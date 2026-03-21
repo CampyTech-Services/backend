@@ -1,1 +1,1 @@
-export * from './blog-inbound-port.service'
+export * from './blog-inbound-port.service';

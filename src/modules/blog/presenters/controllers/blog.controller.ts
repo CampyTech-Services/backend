@@ -14,10 +14,7 @@ export class BlogController {
   }
 
   @Get()
-  findAll(
-    @Query('page') page = '1',
-    @Query('limit') limit = '10',
-  ): Promise<PaginationResult<Blog>> {
+  findAll(@Query('page') page = '1', @Query('limit') limit = '10'): Promise<PaginationResult<Blog>> {
     return this.blogService.findAll(Number(page), Number(limit));
   }
 

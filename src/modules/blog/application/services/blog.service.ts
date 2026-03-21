@@ -5,6 +5,7 @@ import { BlogRepositoryOutputPortService } from '../ports/outbound';
 import { BlogInboundPortService } from '../ports/inbound/blog-inbound-port.service';
 import { LoggerService } from '@/common/logger';
 import { PaginationResult } from '@/common/types';
+
 @Injectable()
 export class BlogService implements BlogInboundPortService {
   constructor(
@@ -50,5 +51,5 @@ export class BlogService implements BlogInboundPortService {
 
   async delete(id: string): Promise<boolean> {
     return this.blogRepository.delete(id);
-  }
+  };
 }
