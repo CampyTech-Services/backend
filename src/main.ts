@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { NestApplication, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import './instrument';
@@ -7,10 +10,8 @@ import * as Sentry from '@sentry/nestjs';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  console.log(process.env.PORT);
   const app = await NestFactory.create<NestApplication>(AppModule);
   const logger = app.get(LoggerService);
-  logger.setContext('Bootstrap');
   app.useGlobalFilters(new CatchAllExceptionFilter(logger));
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ whitelist: false, transform: true }));
