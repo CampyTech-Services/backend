@@ -1,17 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BlogController } from '@mod/blog/presenters/controllers/blog.controller';
+import { AdminBlogController } from '@mod/blog/presenters/controllers';
 import { BlogInboundPortService } from '@mod/blog/application/ports/inbound/blog-inbound-port.service';
 import { Blog } from '@mod/blog/domain/entities';
 import { CreateBlogDto, UpdateBlogDto } from '@mod/blog/application/dto';
 import { PaginationResult } from '@/common/types';
 
 describe('BlogController', () => {
-  let controller: BlogController;
+  let controller: AdminBlogController;
   let mockService: jest.Mocked<BlogInboundPortService>;
+  const sampleContent = { type: 'doc', content: [{ type: 'paragraph', text: 'Hello world' }] };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [BlogController],
+      controllers: [AdminBlogController],
       providers: [
         {
           provide: BlogInboundPortService,
@@ -28,7 +29,7 @@ describe('BlogController', () => {
       ],
     }).compile();
 
-    controller = module.get<BlogController>(BlogController);
+    controller = module.get<AdminBlogController>(AdminBlogController);
     mockService = module.get(BlogInboundPortService);
   });
 
@@ -42,7 +43,7 @@ describe('BlogController', () => {
         title: 'Test',
         slug: 'test',
         featuredImage: 'img',
-        content: 'cont',
+        content: sampleContent,
         categoryId: '550e8400-e29b-41d4-a716-446655440000',
         authorId: '550e8400-e29b-41d4-a716-446655440001',
       };
@@ -58,7 +59,7 @@ describe('BlogController', () => {
 
   describe('findAll', () => {
     it('should return paginated blogs', async () => {
-      const blogs = [new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' })];
+      const blogs = [new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' })];
       const paginationResult: PaginationResult<Blog> = { items: blogs, total: 1, page: 1, limit: 10 };
       mockService.findAll.mockResolvedValue(paginationResult);
 
@@ -71,7 +72,7 @@ describe('BlogController', () => {
 
   describe('findById', () => {
     it('should return a blog by id', async () => {
-      const blog = new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' });
+      const blog = new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' });
       mockService.findById.mockResolvedValue(blog);
 
       const result = await controller.findById('id');
@@ -83,7 +84,7 @@ describe('BlogController', () => {
 
   describe('findBySlug', () => {
     it('should return a blog by slug', async () => {
-      const blog = new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' });
+      const blog = new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' });
       mockService.findBySlug.mockResolvedValue(blog);
 
       const result = await controller.findBySlug('test');
@@ -95,7 +96,7 @@ describe('BlogController', () => {
 
   describe('findByCategoryId', () => {
     it('should return blogs by category id', async () => {
-      const blogs = [new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' })];
+      const blogs = [new Blog({ title: 'Test', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' })];
       mockService.findByCategoryId.mockResolvedValue(blogs);
 
       const result = await controller.findByCategoryId('cat');
@@ -108,7 +109,7 @@ describe('BlogController', () => {
   describe('update', () => {
     it('should update a blog', async () => {
       const updateBlogDto: UpdateBlogDto = { title: 'Updated' };
-      const blog = new Blog({ title: 'Updated', slug: 'test', featuredImage: 'img', content: 'cont', categoryId: 'cat', authorId: 'auth' });
+      const blog = new Blog({ title: 'Updated', slug: 'test', featuredImage: 'img', content: sampleContent, categoryId: 'cat', authorId: 'auth' });
       mockService.update.mockResolvedValue(blog);
 
       const result = await controller.update('id', updateBlogDto);
