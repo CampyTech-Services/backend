@@ -17,11 +17,8 @@ export class AdminCategoryController {
     return this.categoryService.create(createCategoryDto);
   }
 
-  @Get()
-  findAll(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-  ): Promise<PaginationResult<Category>> {
+  @Get('all')
+  findAll(@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number, @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number): Promise<PaginationResult<Category>> {
     return this.categoryService.findAll(page, limit);
   }
 

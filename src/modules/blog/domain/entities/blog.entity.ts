@@ -8,7 +8,7 @@ export class Blog {
   title!: string;
   slug!: string;
   featuredImage!: string;
-  content!: BlogContent;
+  content?: BlogContent;
   excerpt?: string;
   status!: BlogStatus;
   categoryId!: string;
@@ -17,7 +17,7 @@ export class Blog {
   createdAt!: Date;
   updatedAt!: Date;
 
-  constructor(data: { id?: string; title: string; slug: string; featuredImage: string; content: BlogContent; excerpt?: string; status?: BlogStatus; categoryId: string; authorId: string; tagIds?: string[]; createdAt?: Date; updatedAt?: Date }) {
+  constructor(data: { id?: string; title: string; slug: string; featuredImage: string; content?: BlogContent; excerpt?: string; status?: BlogStatus; categoryId: string; authorId: string; tagIds?: string[]; createdAt?: Date; updatedAt?: Date }) {
     Object.assign(this, data);
     this.title = Blog.requireText(data.title, 'title');
     this.slug = Blog.normalizeSlug(data.slug);
@@ -59,7 +59,7 @@ export class Blog {
     return normalized;
   }
 
-  private static requireContent(content: BlogContent): BlogContent {
+  private static requireContent(content: BlogContent | undefined): BlogContent {
     if (content === null || content === undefined) {
       throw new Error('Blog content cannot be empty');
     }
