@@ -15,7 +15,7 @@ export const createBlogSchema = z.object({
   excerpt: z.string().trim().optional(),
   status: blogStatusSchema.optional(),
   categoryId: z.string().uuid(uuidMessage),
-  authorId: z.string().uuid(uuidMessage),
+  // authorId: z.string().uuid(uuidMessage),
   tagIds: tagIdsSchema,
 });
 

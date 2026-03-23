@@ -3,55 +3,48 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EventBusService } from '@/common/events/services';
 
 /**
- * Events Module
+ * Global events infrastructure for the application.
  *
- * Provides a global event bus for inter-module communication.
- * This module enables loose coupling between modules by allowing
- * them to communicate through events instead of direct imports.
+ * Registers `EventEmitter2` once and exposes {@link EventBusService}
+ * as a global provider so feature modules can publish and subscribe to
+ * in-process domain events without taking direct dependencies on each other.
  *
- * ## Architecture
+ * In this application, the module is intended for cross-module flows such as:
+ * - a blog action triggering notifications or audit logging
+ * - an admin action triggering downstream side effects
+ * - content lifecycle events being observed by other bounded contexts
  *
- * ```
- * ┌─────────────────┐      ┌─────────────────┐
- * │  User Module  │──────│  Event Bus      │──────│ Admin Module  │
- * └─────────────────┘      │  (Message Bus)  │      └─────────────────┘
- *                          └─────────────────┘
- *                                   │
- *                          ┌────────┴────────┐
- *                          │                 │
- *                   ┌──────┴──────┐   ┌──────┴──────┐
- *                   │ PaymentReq  │   │   Auth      │
- *                   │   Module    │   │   Module    │
- *                   └─────────────┘   └─────────────┘
- * ```
+ * ## Why this module exists
  *
- * ## Features
+ * It keeps application services focused on their own use case.
+ * A module can emit an event such as `blog.created` and any interested
+ * listener can react to it independently.
  *
- * - **Loose Coupling**: Modules communicate via events, no direct imports
- * - **Async by Default**: Events are handled asynchronously
- * - **Wildcard Support**: Subscribe to patterns like 'blog.*'
- * - **Error Isolation**: Handler errors don't affect publishers
- * - **Correlation IDs**: Track related events across modules
+ * ## Configuration
+ *
+ * - `wildcard: true` enables subscriptions such as `blog.*`
+ * - `delimiter: '.'` makes dot-separated event names first-class
+ * - `verboseMemoryLeak: true` improves diagnostics when too many listeners are registered
+ * - `ignoreErrors: false` keeps emitter errors visible instead of silently swallowing them
  *
  * ## Usage
  *
- * ### Publishing Events (in any module)
+ * ### Publishing an event
  *
  * ```typescript
  * import { EventBusService, createBaseEvent } from '@/common/events';
  *
  * @Injectable()
- * export class blogService {
+ * export class BlogService {
  *   constructor(private readonly eventBus: EventBusService) {}
  *
- *   async createblog(data: CreateblogDto) {
+ *   async createBlog(data: CreateBlogDto) {
  *     const blog = await this.repository.create(data);
  *
- *     // Publish event after successful creation
  *     await this.eventBus.publish(
  *       createBaseEvent('blog.created', 'blog-module', {
  *         blogId: blog.id,
- *         reference: blog.reference,
+ *         authorId: blog.authorId,
  *       }),
  *     );
  *
@@ -60,22 +53,20 @@ import { EventBusService } from '@/common/events/services';
  * }
  * ```
  *
- * ### Subscribing to Events (decorator-based)
+ * ### Subscribing with `@OnEvent`
  *
  * ```typescript
  * import { OnEvent } from '@nestjs/event-emitter';
  *
  * @Injectable()
- * export class PaymentEventHandler {
+ * export class BlogEventHandler {
  *   @OnEvent('blog.created')
- *   async handleblogCreated(event: blogCreatedEvent) {
- *     // React to blog creation
- *     console.log('blog created:', event.payload);
+ *   async handleBlogCreated(event: BaseEvent<{ blogId: string; authorId: string }>) {
+ *     console.log('blog created:', event.payload.blogId);
  *   }
  *
  *   @OnEvent('blog.*')
- *   async handleAllblogEvents(event: BaseEvent) {
- *     // React to all blog events
+ *   async handleAllBlogEvents(event: BaseEvent) {
  *     console.log('blog event:', event.eventName);
  *   }
  * }
@@ -83,15 +74,17 @@ import { EventBusService } from '@/common/events/services';
  *
  * ### Event Naming Convention
  *
- * Events should follow the pattern: `module.action`
+ * Prefer the pattern `context.action`.
+ * Use names that describe a completed domain fact, not a controller method name.
  *
  * Examples:
  * - `blog.created`
- * - `blog.settled`
- * - `blog.cancelled`
- * - `payment.completed`
- * - `payment.failed`
- * - `payment-request.created`
+ * - `blog.published`
+ * - `comment.created`
+ * - `admin.created`
+ * - `admin.password-changed`
+ * - `category.updated`
+ * - `tag.deleted`
  */
 @Global()
 @Module({

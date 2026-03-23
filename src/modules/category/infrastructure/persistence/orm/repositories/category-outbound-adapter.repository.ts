@@ -32,6 +32,7 @@ export class CategoryOutboundAdapterRepository implements CategoryRepositoryOutp
   async findAll(page = 1, limit = 10): Promise<PaginationResult<Category>> {
     const skip = (page - 1) * limit;
     const [items, total] = await Promise.all([this.categoryRepository.category.findMany({ skip, take: limit }), this.categoryRepository.category.count()]);
+
     return {
       items: items.map((item) => this.toDomain(item)),
       total,

@@ -17,11 +17,8 @@ export class AdminTagController {
     return this.tagService.create(createTagDto);
   }
 
-  @Get()
-  findAll(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-  ): Promise<PaginationResult<Tag>> {
+  @Get('all')
+  findAll(@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number, @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number): Promise<PaginationResult<Tag>> {
     return this.tagService.findAll(page, limit);
   }
 

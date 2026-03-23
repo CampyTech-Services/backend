@@ -5,6 +5,34 @@ import { Blog, BlogContent } from '@mod/blog/domain';
 import { BlogRepositoryOutputPortService } from '@mod/blog/application/ports/outbound/blog-repository-outbound-port.service';
 import { PaginationResult } from '@/common/types';
 
+const blogSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  featuredImage: true,
+  excerpt: true,
+  status: true,
+  content: true,
+  categoryId: true,
+  authorId: true,
+  createdAt: true,
+  updatedAt: true,
+  tags: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+    },
+  },
+  author: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  },
+} as const;
+
 /**
  * Adapter repository for blog outbound port using Prisma.
  */
@@ -39,7 +67,16 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
 
   async findAll(page = 1, limit = 10): Promise<PaginationResult<Blog>> {
     const skip = (page - 1) * limit;
-    const [items, total] = await Promise.all([this.prisma.blog.findMany({ skip, take: limit, include: { tags: true } }), this.prisma.blog.count()]);
+
+    const [items, total] = await Promise.all([
+      this.prisma.blog.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'asc' },
+        select: blogSelect,
+      }),
+      this.prisma.blog.count(),
+    ]);
     return {
       items: items.map((item) => this.toDomain(item)),
       total,
@@ -51,10 +88,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
   async findPublished(page = 1, limit = 10): Promise<PaginationResult<Blog>> {
     const skip = (page - 1) * limit;
     const where = { status: 'PUBLISHED' as const };
-    const [items, total] = await Promise.all([
-      this.prisma.blog.findMany({ where, skip, take: limit, include: { tags: true } }),
-      this.prisma.blog.count({ where }),
-    ]);
+    const [items, total] = await Promise.all([this.prisma.blog.findMany({ where, skip, take: limit, select: blogSelect }), this.prisma.blog.count({ where })]);
 
     return {
       items: items.map((item) => this.toDomain(item)),
@@ -94,7 +128,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
         title: blog.title,
         slug: blog.slug,
         featuredImage: blog.featuredImage,
-        content: blog.content as Prisma.InputJsonValue,
+        // content: blog.content as Prisma.InputJsonValue,
         excerpt: blog.excerpt,
         status: blog.status,
         categoryId: blog.categoryId,
@@ -117,7 +151,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
     title: string;
     slug: string;
     featuredImage: string;
-    content: BlogContent;
+    content?: BlogContent;
     excerpt: string | null;
     status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
     categoryId: string;
