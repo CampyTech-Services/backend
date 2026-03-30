@@ -12,7 +12,7 @@ const blogSelect = {
   featuredImage: true,
   excerpt: true,
   status: true,
-  content: true,
+  content: false,
   categoryId: true,
   authorId: true,
   createdAt: true,
@@ -73,7 +73,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
         skip,
         take: limit,
         orderBy: { createdAt: 'asc' },
-        select: blogSelect,
+        select: { ...blogSelect, content: true },
       }),
       this.prisma.blog.count(),
     ]);
@@ -104,7 +104,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
   }
 
   async findPublishedBySlug(slug: string): Promise<Blog | null> {
-    const blog = await this.prisma.blog.findFirst({ where: { slug, status: 'PUBLISHED' }, include: { tags: true } });
+    const blog = await this.prisma.blog.findFirst({ where: { slug, status: 'PUBLISHED' }, select: { ...blogSelect, content: true, authorId: false, author: { select: { displayName: true } } } });
     return blog ? this.toDomain(blog) : null;
   }
 
@@ -128,7 +128,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
         title: blog.title,
         slug: blog.slug,
         featuredImage: blog.featuredImage,
-        // content: blog.content as Prisma.InputJsonValue,
+        content: blog.content as Prisma.InputJsonValue,
         excerpt: blog.excerpt,
         status: blog.status,
         categoryId: blog.categoryId,
@@ -155,10 +155,11 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
     excerpt: string | null;
     status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
     categoryId: string;
-    authorId: string;
+    authorId?: string;
     tags?: Array<{ id: string }>;
     createdAt: Date;
     updatedAt: Date;
+    author?: Record<string, string>;
   }): Blog {
     return new Blog({
       id: blog.id,
@@ -170,6 +171,7 @@ export class BlogOutboundAdapterRepository implements BlogRepositoryOutputPortSe
       status: blog.status,
       categoryId: blog.categoryId,
       authorId: blog.authorId,
+      author: blog.author,
       tagIds: blog.tags?.map((tag) => tag.id) ?? [],
       createdAt: blog.createdAt,
       updatedAt: blog.updatedAt,

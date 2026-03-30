@@ -7,11 +7,8 @@ import { PaginationResult } from '@/common/types';
 export class PublicBlogController {
   constructor(private readonly blogService: BlogInboundPortService) {}
 
-  @Get()
-  findAll(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-  ): Promise<PaginationResult<Blog>> {
+  @Get('published')
+  findAll(@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number, @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number): Promise<PaginationResult<Blog>> {
     return this.blogService.findPublished(page, limit);
   }
 
