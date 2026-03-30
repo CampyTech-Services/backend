@@ -16,17 +16,33 @@ export class Blog {
   tagIds!: string[];
   createdAt!: Date;
   updatedAt!: Date;
+  author?: Record<string, string>;
 
-  constructor(data: { id?: string; title: string; slug: string; featuredImage: string; content?: BlogContent; excerpt?: string; status?: BlogStatus; categoryId: string; authorId: string; tagIds?: string[]; createdAt?: Date; updatedAt?: Date }) {
+  constructor(data: {
+    id?: string;
+    title: string;
+    slug: string;
+    featuredImage: string;
+    content?: BlogContent;
+    excerpt?: string;
+    status?: BlogStatus;
+    categoryId: string;
+    authorId: string;
+    tagIds?: string[];
+    createdAt?: Date;
+    updatedAt?: Date;
+    author?: Record<string, string>;
+  }) {
     Object.assign(this, data);
     this.title = Blog.requireText(data.title, 'title');
     this.slug = Blog.normalizeSlug(data.slug);
     this.featuredImage = Blog.requireText(data.featuredImage, 'featuredImage');
-    this.content = Blog.requireContent(data.content);
+    this.content = data.content ? Blog.requireContent(data.content) : undefined;
     this.categoryId = Blog.requireText(data.categoryId, 'categoryId');
-    this.authorId = Blog.requireText(data.authorId, 'authorId');
+    this.authorId = data.authorId ? Blog.requireText(data.authorId, 'authorId') : undefined;
     this.tagIds = Blog.normalizeTagIds(data.tagIds);
     this.excerpt = data.excerpt?.trim() || undefined;
+    this.author['displayName'] = data?.author?.displayName;
     if (!this.status) this.status = 'DRAFT';
   }
 
@@ -38,7 +54,7 @@ export class Blog {
     if (data.title !== undefined) this.title = Blog.requireText(data.title, 'title');
     if (data.slug !== undefined) this.slug = Blog.normalizeSlug(data.slug);
     if (data.featuredImage !== undefined) this.featuredImage = Blog.requireText(data.featuredImage, 'featuredImage');
-    if (data.content !== undefined) this.content = Blog.requireContent(data.content);
+    if (data.content !== undefined) this.content = Blog.requireContent(data.content) || '';
     if (data.excerpt !== undefined) this.excerpt = data.excerpt?.trim() || undefined;
     if (data.status !== undefined) this.status = data.status;
     if (data.categoryId !== undefined) this.categoryId = Blog.requireText(data.categoryId, 'categoryId');
